@@ -43,4 +43,3 @@ print(generate_parent(15))
 child = crossover(x)
 #print(child.single_crossover())
 print(child.single_crossover())
-
