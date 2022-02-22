@@ -1,6 +1,19 @@
 import random
 import string
-# initia; population 
+import pygame
+
+pygame.init()
+random_row = 0
+random_col = 0
+width = 500
+height = 500
+dimension = 50
+square_size = height/dimension
+screen = pygame.display.set_mode((width,height))
+white = (200, 200, 200)
+red = (255,   0,   0)
+green = (34,139,34) #forest green color
+yellow = (255,255,0)
 p1 = ''
 p2 = ''
 p = ''
@@ -83,7 +96,41 @@ print("two point crossover",child.two_point_crossover())
 call_mutation = mutation()
 print("mutation_sub",call_mutation.sub())
 
-#0000000010101010
+def drawGrid():
+    blockSize = int(square_size) #Set the size of the grid block
+    for x in range(0, width, blockSize):
+        for y in range(0, width, blockSize):
+            rect = pygame.Rect(x, y, blockSize, blockSize)
+            pygame.draw.rect(screen, white, rect, 1)
 
+def draw_organism():
+    global random_row,random_col
+    food_location_collection = []
+    food_location = []
 
-# object oriented program bulit crossover function
+    for i in range(20):
+        random_food_r =random.randint(1,50) * int(square_size)
+        random_food_c = random.randint(1,50) * int(square_size)
+        food_location.append(random_food_r)
+        food_location.append(random_food_c)
+        food_location_collection.append(food_location)
+        pygame.draw.rect(screen,green,pygame.Rect(random_food_c,random_food_r,int(square_size),int(square_size)))
+        pygame.draw.rect(screen,yellow,pygame.Rect(1,1,int(square_size),int(square_size)))
+
+    return food_location
+def move_organism(speed):
+    pass
+
+running = True
+draw_organism()
+
+while True:
+        drawGrid()
+        
+       
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+               
+
+        pygame.display.update()
