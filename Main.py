@@ -1,20 +1,17 @@
 import random
 import string
-from numpy import square
 import pygame
 
 pygame.init()
-generation = 0
+matrix = [[0 for i in range(50)] for i in range(50)]
+avg_score_parents = []
 random_row = 0
 random_col = 0
-food_location_collection = []
-food_location = []
-real_height = 600
 width = 500
 height = 500
 dimension = 50
-square_size = height/dimension # in this case it is 10, 500/50 = 10
-screen = pygame.display.set_mode((width,real_height))
+square_size = height/dimension
+screen = pygame.display.set_mode((width,height))
 white = (200, 200, 200)
 red = (255,   0,   0)
 green = (34,139,34) #forest green color
@@ -22,7 +19,7 @@ yellow = (255,255,0)
 p1 = ''
 p2 = ''
 p = ''
-population = 100
+population = 20
 parents = [] # collection of possible solution
 x = 9 # length of chromosome
 crossover_point = random.randint(0,x)
@@ -45,8 +42,8 @@ def pick_parents(population,parents):
     global p1,p2
     male = random.randint(0,population)
     female = random.randint(0,population)
-    p1 = parents[male]
-    p2 = parents[female]
+    p1 = parents[male-1]
+    p2 = parents[female-1]
     return male,p1,female,p2
 
 class crossover():
@@ -92,17 +89,16 @@ class mutation(crossover):
 def fitness_score():
     pass
 
-print(generate_parent(x))
-print("call pick_parents function",pick_parents(population,parents))
-print("parent1 and parent2",p1,p2)
+#print(generate_parent(x))
+#print("call pick_parents function",pick_parents(population,parents))
+#print("parent1 and parent2",p1,p2)
 
-child = crossover(crossover_point)
-print("two point crossover",child.two_point_crossover())
-call_mutation = mutation()
-print("mutation_sub",call_mutation.sub())
+#child = crossover(crossover_point)
+#print("two point crossover",child.two_point_crossover())
+#call_mutation = mutation()
+#print("mutation_sub",call_mutation.sub())
 
 def drawGrid():
-    # the greed has a coordinate for (0,0) to (490,490)
     blockSize = int(square_size) #Set the size of the grid block
     for x in range(0, width, blockSize):
         for y in range(0, width, blockSize):
@@ -110,66 +106,88 @@ def drawGrid():
             pygame.draw.rect(screen, white, rect, 1)
 
 def draw_organism():
-    global random_row,random_col,food_location_collection,food_location
-    #colors = ["red","blue","yellow","orange","green","white"] # this color is for debuggin purpose later make sure to remove this color list and unite organism with one color. 
-    for i in range(6):
-        random_r =random.randint(1,49) * int(square_size)
-        random_c = random.randint(1,49) * int(square_size)
-        food_location = [random_r,random_c,]
+    global random_row,random_col
+    food_location_collection = []
+    food_location = []
+    colors = ["red","blue","white","yellow"]
+    for i in range(5):
+        random_food_r = random.randint(1,50) * int(square_size)
+        random_food_c = random.randint(1,50) * int(square_size)
+        pygame.draw.rect(screen,green,pygame.Rect(random_food_c,random_food_r,int(square_size),int(square_size)))
+        pygame.draw.rect(screen,yellow,pygame.Rect(1,1,int(square_size),int(square_size)))
+        food_location.append(random_food_r)
+        food_location.append(random_food_c)
+        #print(food_location)
+        #occupied(matrix,dimension,food_location)
         food_location_collection.append(food_location)
-        pygame.draw.rect(screen,white,pygame.Rect(random_r,random_c,int(square_size),int(square_size)))
-        #pygame.draw.rect(screen,yellow,pygame.Rect(1,1,int(square_size),int(square_size))) #also for debugging purpose
-
-    return food_location
-def move_organism(food_location_collection,square_size,dimension):
-    print(food_location_collection)
-    organism_x_val = 0
-    organism_y_val = 0
-    
-    will_move = []
-    will_move_collection = []
-    for x in range(len(food_location_collection)):
-        for y in range(0,2):
-            if y == 0:
-                organism_x_val = dimension*10 - food_location_collection[x][y]
-            else:
-                organism_y_val = dimension*10 - food_location_collection[x][y]
-
-        if organism_x_val/10 == 49:
-            if organism_y_val/10 == 49: 
-                will_move = [0,0]
-                will_move_collection.append(will_move)
-            else:
-                will_move = [0,random.randint(organism_y_val/10,49)*int(square_size)]
-                will_move_collection.append(will_move)
-        else:
-            if organism_y_val/10 == 49:
-                will_move = [random.randint(organism_x_val/10,49)*int(square_size),0]
-                will_move_collection.append(will_move)
-
-            else:
-                will_move = [random.randint(organism_x_val/10,49)*int(square_size),random.randint(organism_y_val/10,49)*int(square_size)]
-                will_move_collection.append(will_move)
-
+        food_location = [] # you have to reset the food_location list since it act as temporary storage
         
-    print(will_move_collection)
+    print_matrix(matrix)
+    print(food_location_collection,len(food_location_collection))
+    occupied(matrix,dimension,food_location_collection)
 
-    for x in range(len(will_move_collection)):
-        pygame.draw.rect(screen,green,pygame.Rect(will_move_collection[x][0],will_move_collection[x][1],int(square_size),int(square_size)))
 
-
-       
-       
-
-            
+def fitness_organism(parents,avg_score_parents):
+    # in order of A>B>C>D>
+    #avg_score_parents = []
+    sum = 0
+    for i in range(len(parents)):
+        for j in (parents[i]):
+            sum = sum + int(j)
+        avg_score_parents.append(sum/9)
     
-    print(will_move_collection)
+    #print("avg_parent_score",avg_score_parents,max(avg_score_parents,),min(avg_score_parents))
+
+def group_animals(avg_score_parets):
+    A = []
+    B = []
+    C = []
+    D = []
+
+    for i in avg_score_parents:
+        if i > 0 and i <= 25:
+            D.append(i)
+        elif i > 25 and i <= 50:
+            C.append(i)
+        elif i > 50 and i <= 75:
+            B.append(i)
+        elif i > 75 and i <= 100:
+            A.append(i)
+
+    print("D",D,"C",C,"B",B,"A",A)
+        
     
+
+def move_organism(speed):
+    pass
+
+def occupied(matrix,dimension,food_location_collection):
+    r = 0
+    c = 0
+    for i in range(len(food_location_collection)):
+        for j in range(0,2):
+            if j == 1:
+                r = int(food_location_collection[i][0]/10)
+            else:
+                c = int(food_location_collection[i][1]/10)
+                matrix[r][c] = 1
+    return matrix   
+
+def print_matrix(matrix):
+    count = 0
+    for i in range(49):
+        for j in range(49):
+            if matrix[i][j] == 1:
+                count +=1
+            print(matrix[j][j],end = '')
+    print("count",count)
+    
+
 running = True
 draw_organism()
-move_organism(food_location_collection,square_size,dimension)
+fitness_organism(parents,avg_score_parents)
+group_animals(avg_score_parents)
 while True:
-    
         drawGrid()
         
        
