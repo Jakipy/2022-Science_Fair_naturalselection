@@ -3,9 +3,11 @@ from re import L
 import string
 from numpy import square
 import pygame
-
+import matplotlib.pyplot as plt
+import numpy
 pygame.init()
 organism_info = () # row,col,group,color
+divided_parents_group = []
 matrix = [[0 for i in range(50)] for i in range(50)]
 avg_score_parents = []
 generation = 0
@@ -38,6 +40,7 @@ else:
 print(crossover_point)
 # generating 100 parents, go into fitness score function
 def generate_parent(x):
+    
     global parents,population
     letters = string.digits
     for i in range(population):
@@ -155,15 +158,15 @@ def move_organism(food_location_collection,square_size,dimension):
                     will_move = [0,0]
                     will_move_collection.append(will_move)
                 else:
-                    will_move = [0,random.randint(organism_y_val/10,49)*int(square_size)]
+                    will_move = [0,random.randint(organism_y_val/10,dimension-1)*int(square_size)]
                     will_move_collection.append(will_move)
             else:
                 if organism_y_val/10 == 49:
-                    will_move = [random.randint(organism_x_val/10,49)*int(square_size),0]
+                    will_move = [random.randint(organism_x_val/10,dimension-1)*int(square_size),0]
                     will_move_collection.append(will_move)
 
                 else:
-                    will_move = [random.randint(organism_x_val/10,49)*int(square_size),random.randint(organism_y_val/10,49)*int(square_size)]
+                    will_move = [random.randint(organism_x_val/10,dimension-1)*int(square_size),random.randint(organism_y_val/10,49)*int(square_size)]
                     will_move_collection.append(will_move)
 
         
@@ -175,7 +178,7 @@ def move_organism(food_location_collection,square_size,dimension):
 
 def group_animals(avg_score_parents):
     temp = []
-    divided_parents_group = []
+    global divided_parents_group
    
     for i in avg_score_parents:
         if i > 0 and i <= 25:
@@ -199,18 +202,67 @@ def group_animals(avg_score_parents):
 
     print("divided_parents_group", divided_parents_group)
  
+def fillmatrix(matrix,food_location_collection):
+    print(type(matrix))
+    count = 0
+    r = 0
+    c = 0
+    for x in range(len(food_location_collection)):
+        for y in range(0,2):
+            if y == 0:
+                r = food_location_collection[x][y]
+                print("r",r)
+            else:
+                c = food_location_collection[x][y]
+                print("c",c)
+            matrix[r/10][c/10] = 1
+            count +=1
+    print("count",count)
 
-def are_they_next_to_each_other(will_move_collection):
-    pass
+def second_max(avg_score_parents):
+    temp = avg_score_parents
+    m = max(avg_score_parents)
+    temp.remove(m)
+    temp.append(m)
+    n = 0
+    for i in range(0,len(temp)-1):
+        if temp[i] > 0:
+            n = temp[i]
+    return temp[i]
+    
+def reproduce(avg_score_parents):
+    # get rid of lowest score parents and produce 5 extra
+    t = second_max(avg_score_parents)
+    avg_score_parents.append((max(avg_score_parents)+second_max(avg_score_parents))/2)
+    #avg_score_parents.remove(min(avg_score_parents))
+
+
+    print("average score after", avg_score_parents)
+def graphing(avg_score_parents):
+    global generation
+    plt.plot(avg_score_parents)
+    plt.ylabel("fitness_score")
+    plt.xlabel("generation")
+    plt.xlim(0,100)
+    plt.ylim(0,100)
+    plt.show()
 
 running = True
+
 avg_fitness_score(parents,avg_score_parents)
 group_animals(avg_score_parents)
 draw_organism()
 move_organism(food_location_collection,square_size,dimension)
+fillmatrix(matrix,food_location_collection)
+#graphing(avg_score_parents)
+reproduce(avg_score_parents)
 while True:
-    
+        graphing(avg_score_parents)
         drawGrid()
+        #for i in range(5):
+           # graphing(avg_score_parents)
+            #reproduce(avg_score_parents)
+            
         
        
         for event in pygame.event.get():
