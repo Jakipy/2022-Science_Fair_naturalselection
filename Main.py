@@ -57,47 +57,32 @@ def pick_parents(population,parents):
     p2 = parents[female]
     return male,p1,female,p2
 
-class crossover():
-    global p1,p2,x
-    def __init__ (self,crossover_point,child1 = '',child2=''):
-        self.p1 = p1
-        self.p2 = p2
-        self.crossover_point = crossover_point
-        self.child1= child1
-        self.child2 = child2
-    
-    def single_crossover(self):
-        self.child1 = p1[0:self.crossover_point] + p2[self.crossover_point:x]
-        self.child2 = p2[self.crossover_point:x] + p1[0:self.crossover_point]
-        return self.child1,self.child2,len(self.child1),len(self.child2)
 
-    def two_point_crossover(self):
-        # two different crossover point
-        crossover_point1 = random.randint(1,x)
-        crossover_point2 = random.randint(1,x)
-        point1 = max(crossover_point1,crossover_point2)
-        point2 = min(crossover_point1,crossover_point2)
-        # assume point1 != point2 fix it later
-        self.child1 = p1[0:point2] + p2[point2:point1] + p1[point1:x]
-        print(p1[0:point2],p2[point2:point1],p1[point1:x])
-        self.child2 = p2[0:point2] + p1[point2:point1] + p2[point1:x]
-        print(p2[0:point2],p1[point2:point1],p2[point1:x])
-        return self.child1,self.child2,point1,point2
+def single_corssover(parent1,parent2,x,crossover_point,parents):
+   child1 = parent1[0:crossover_point] + parent2[crossover_point:x]
+   child2 = parent2[crossover_point:x] + parent1[0:crossover_point]
+   parents.append(child1)
+   parents.append(child2)
+   return child1,child2
 
-class mutation(crossover):
-    global x
-    def __init__(self):
-        super().__init__(self)
-    def sub(self):
-        sub_point = random.randint(1,x)
-        to_replace = random.choice(string.digits)
-        print("children to be mutated",self.child1,self.child2)
-        self.child1 = self.child1[:sub_point] + str(to_replace) + self.child1[sub_point+1:]
-        self.child2 = self.child2[:sub_point] + str(to_replace) + self.child2[sub_point+1:]
-        
-        return sub_point,to_replace,self.child1,self.child2
+#print(single_corssover("123456","654321",6,random.randint(1,6)))
 
-print(generate_parent(x))
+def two_crossover(parent1,parent2,x,parents):
+    # two different crossover point
+    crossover_point1 = random.randint(1,x)
+    crossover_point2 = random.randint(1,x)
+    point1 = max(crossover_point1,crossover_point2)
+    point2 = min(crossover_point1,crossover_point2)
+    # assume point1 != point2 fix it later
+    child1 = p1[0:point2] + p2[point2:point1] + p1[point1:x]
+    print(p1[0:point2],p2[point2:point1],p1[point1:x])
+    child2 = p2[0:point2] + p1[point2:point1] + p2[point1:x]
+    print(p2[0:point2],p1[point2:point1],p2[point1:x])
+    parents.append(child1)
+    parents.append(child2)
+    return child1,child2,point1,point2
+
+
 #print("call pick_parents function",pick_parents(population,parents))
 #print("parent1 and parent2",p1,p2)
 
@@ -138,42 +123,6 @@ def draw_organism():
         food_location = [] # you have to reset the food_location list since it act as temporary storage
         
     print("location",food_location_collection) 
-def move_organism(food_location_collection,square_size,dimension):
-    #print("jake is the best",food_location_collection)
-    organism_x_val = 0
-    organism_y_val = 0
-    
-    will_move = []
-    will_move_collection = []
-    for x in range(len(food_location_collection)):
-        print("ho")
-        for y in range(0,2):
-            if y == 0:
-                organism_x_val = dimension*10 - food_location_collection[x][y]
-            else:
-                organism_y_val = dimension*10 - food_location_collection[x][y]
-
-            if organism_x_val/10 == 49:
-                if organism_y_val/10 == 49: 
-                    will_move = [0,0]
-                    will_move_collection.append(will_move)
-                else:
-                    will_move = [0,random.randint(organism_y_val/10,dimension-1)*int(square_size)]
-                    will_move_collection.append(will_move)
-            else:
-                if organism_y_val/10 == 49:
-                    will_move = [random.randint(organism_x_val/10,dimension-1)*int(square_size),0]
-                    will_move_collection.append(will_move)
-
-                else:
-                    will_move = [random.randint(organism_x_val/10,dimension-1)*int(square_size),random.randint(organism_y_val/10,49)*int(square_size)]
-                    will_move_collection.append(will_move)
-
-        
-    print("Will move collection",will_move_collection)
-
-    for x in range(len(will_move_collection)):
-        pygame.draw.rect(screen,green,pygame.Rect(will_move_collection[x][0],will_move_collection[x][1],int(square_size),int(square_size)))
 
 
 def group_animals(avg_score_parents):
@@ -202,42 +151,13 @@ def group_animals(avg_score_parents):
 
     print("divided_parents_group", divided_parents_group)
  
-def fillmatrix(matrix,food_location_collection):
-    print(type(matrix))
-    count = 0
-    r = 0
-    c = 0
-    for x in range(len(food_location_collection)):
-        for y in range(0,2):
-            if y == 0:
-                r = food_location_collection[x][y]
-                print("r",r)
-            else:
-                c = food_location_collection[x][y]
-                print("c",c)
-            matrix[r/10][c/10] = 1
-            count +=1
-    print("count",count)
-
-def second_max(avg_score_parents):
-    temp = avg_score_parents
-    m = max(avg_score_parents)
-    temp.remove(m)
-    temp.append(m)
-    n = 0
-    for i in range(0,len(temp)-1):
-        if temp[i] > 0:
-            n = temp[i]
-    return temp[i]
+def reproduce(parents):
+    a = random.randint(1,2)
+    if a == 1:
+        two_crossover(parents[random.randint(1,len(parents))],parents[random.randint(1,len(parents))],x,parents)
+    else:
+        single_corssover(parents[random.randint(1,len(parents))],parents[random.randint(1,len(parents))],x,random.ranint(1,x),parents)
     
-def reproduce(avg_score_parents):
-    # get rid of lowest score parents and produce 5 extra
-    t = second_max(avg_score_parents)
-    avg_score_parents.append((max(avg_score_parents)+second_max(avg_score_parents))/2)
-    #avg_score_parents.remove(min(avg_score_parents))
-
-
-    print("average score after", avg_score_parents)
 def graphing(avg_score_parents):
     global generation
     plt.plot(avg_score_parents)
@@ -248,26 +168,17 @@ def graphing(avg_score_parents):
     plt.show()
 
 running = True
-
+generate_parent(x)
 avg_fitness_score(parents,avg_score_parents)
 group_animals(avg_score_parents)
 draw_organism()
-move_organism(food_location_collection,square_size,dimension)
-fillmatrix(matrix,food_location_collection)
-#graphing(avg_score_parents)
-reproduce(avg_score_parents)
 while True:
-        graphing(avg_score_parents)
-        drawGrid()
-        #for i in range(5):
-           # graphing(avg_score_parents)
-            #reproduce(avg_score_parents)
-            
-        
-       
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+    reproduce(parents)
+    graphing(avg_score_parents)
+    drawGrid()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
                
 
-        pygame.display.update()
+pygame.display.update()
