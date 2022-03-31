@@ -1,184 +1,128 @@
 import random
-from re import L
+from re import M
 import string
-from numpy import square
-import pygame
-import matplotlib.pyplot as plt
-import numpy
-pygame.init()
-organism_info = () # row,col,group,color
-divided_parents_group = []
-matrix = [[0 for i in range(50)] for i in range(50)]
-avg_score_parents = []
-generation = 0
-random_row = 0
-random_col = 0
-food_location_collection = []
-food_location = []
-real_height = 600
-width = 500
-height = 500
-dimension = 50
-square_size = height/dimension # in this case it is 10, 500/50 = 10
-screen = pygame.display.set_mode((width,real_height))
-white = (200, 200, 200)
-red = (255,   51,   51)
-green = (51,255,153) #forest green color
-yellow = (255,255,0)
-sky_blue = (51,255,255)
-p1 = ''
-p2 = ''
-p = ''
+# parent
+# temp
+# temp with child 
+# temp with child -> new parent
+parents = []
 population = 10
-parents = [] # collection of possible solution
-x = 9 # length of chromosome
-crossover_point = random.randint(0,x)
-if x%2 == 0:
-    crossover_point = x/2
-else:
-    crossover_point = x/2 + 0.5
-print(crossover_point)
-# generating 100 parents, go into fitness score function
+generation = 10 #repeating process 100 times 100 generation
+evolution = [] # this will be two dimensional list
+
+x = 10 # should be divisible by 5 
 def generate_parent(x):
     
     global parents,population
     letters = string.digits
-    for i in range(population):
+    for i in range(population): # generating 10 organism 
 
         result_str = ''.join(random.choice(letters) for i in range(x))
-        parents.append(result_str)
-    print("parents",parents)
+        parents.append(result_str) #storing the genetic information on the list called parent
+    
 
-def pick_parents(population,parents):
-    global p1,p2
-    male = random.randint(0,population)
-    female = random.randint(0,population)
-    p1 = parents[male]
-    p2 = parents[female]
-    return male,p1,female,p2
+    #print("initial parents population",parents)
+  
+    evolution.append(parents)
 
+def t_selection(parents): # this function will select k candiates from the parents.
+    # in each generation 6 candidates will be choosen. which means t_selection will be excecuted 6 times per generation
+    k = int(len(parents)/5) # choose 20% of population
+    temp = [] # selected k indiviual genes
+    score = [] # scores for selected k indivual genes
+    m = 0
+    
+    r = random.randint(1,len(parents)-k)
+    temp = parents[r:r+k] # choosing a section of the parent with k indivual candidates
+    for i in range(len(temp)):
+        v = evaluation(temp[i])
+        if v > m:
+            m = v
+            m_index = i
 
-def single_corssover(parent1,parent2,x,crossover_point,parents):
-   child1 = parent1[0:crossover_point] + parent2[crossover_point:x]
-   child2 = parent2[crossover_point:x] + parent1[0:crossover_point]
-   parents.append(child1)
-   parents.append(child2)
-   return child1,child2
-
-#print(single_corssover("123456","654321",6,random.randint(1,6)))
-
-def two_crossover(parent1,parent2,x,parents):
-    # two different crossover point
-    crossover_point1 = random.randint(1,x)
-    crossover_point2 = random.randint(1,x)
-    point1 = max(crossover_point1,crossover_point2)
-    point2 = min(crossover_point1,crossover_point2)
-    # assume point1 != point2 fix it later
-    child1 = p1[0:point2] + p2[point2:point1] + p1[point1:x]
-    print(p1[0:point2],p2[point2:point1],p1[point1:x])
-    child2 = p2[0:point2] + p1[point2:point1] + p2[point1:x]
-    print(p2[0:point2],p1[point2:point1],p2[point1:x])
-    parents.append(child1)
-    parents.append(child2)
-    return child1,child2,point1,point2
-
-
-#print("call pick_parents function",pick_parents(population,parents))
-#print("parent1 and parent2",p1,p2)
-
-#child = crossover(crossover_point)
-#print("two point crossover",child.two_point_crossover())
-#call_mutation = mutation()
-#print("mutation_sub",call_mutation.sub())
-
-def avg_fitness_score(parents,avg_score_parents):
-    sum = 0
-    for i in range(len(parents)):
-        for j in (parents[i]):
-            sum = sum + int(j)
-        avg_score_parents.append(sum/x)
-
-    print("avagre score parents",avg_score_parents)
-
-def drawGrid():
-    # the greed has a coordinate for (0,0) to (490,490)
-    blockSize = int(square_size) #Set the size of the grid block
-    for x in range(0, width, blockSize):
-        for y in range(0, width, blockSize):
-            rect = pygame.Rect(x, y, blockSize, blockSize)
-            pygame.draw.rect(screen, white, rect, 1)
-
-def draw_organism():
-    global random_row,random_col
-    food_location_collection = []
-    food_location = []
-   
-    for i in range(population):
-        random_food_r = random.randint(1,49) * int(square_size)
-        random_food_c = random.randint(1,49) * int(square_size)
-        pygame.draw.rect(screen,red,pygame.Rect(random_food_c,random_food_r,int(square_size),int(square_size)))
-        food_location.append(random_food_r)
-        food_location.append(random_food_c)
-        food_location_collection.append(food_location)
-        food_location = [] # you have to reset the food_location list since it act as temporary storage
+    c = temp[m_index]
+    return c # c is the choosen candidate 
+            
+def evaluation(x):
+    s = 0
+    v = 0 # fitness score of the gene
+    for i in range(len(x)):
+        s += int(x[i])
+    v = s/len(x)
+    v = int(v)
+    return v
+                
+# crossover
+def single_crossover(temp):
+    x = len(temp)
+    cp = random.randint(0,x)
+    for i in range(int(x/2)):
+        a = temp[i]
+        b = temp[i+1]
+        child = a[0:cp] + b[cp:10]
+        temp.append(child)
+    return temp
         
-    print("location",food_location_collection) 
 
 
-def group_animals(avg_score_parents):
-    temp = []
-    global divided_parents_group
-   
-    for i in avg_score_parents:
-        if i > 0 and i <= 25:
-            temp = ["D","white"]
-            divided_parents_group.append(temp)
-            temp = []
-        elif i > 25 and i <= 50:
-            temp = ["C","yellow"]
-            divided_parents_group.append(temp)
-            temp = []
-        elif i > 50 and i <= 75:
-            temp = ["B","sky_blue"]
-            divided_parents_group.append(temp)
-            temp = []
-        elif i > 75:
-            temp = ["A","red"]
-            divided_parents_group.append(temp)
-            temp = []
-
-    
-
-    print("divided_parents_group", divided_parents_group)
- 
-def reproduce(parents):
-    a = random.randint(1,2)
-    if a == 1:
-        two_crossover(parents[random.randint(1,len(parents))],parents[random.randint(1,len(parents))],x,parents)
+def twopoint_crossover(temp): # have some probelem (produce more children)
+    one = random.randint(0,x)
+    two = random.randint(0,x)
+    n = 0
+    m = 0
+    if one > two:
+        n = one
+        m = two
+    elif one < two:
+        n = two
+        m = one
     else:
-        single_corssover(parents[random.randint(1,len(parents))],parents[random.randint(1,len(parents))],x,random.ranint(1,x),parents)
+        two = random.randint(0,x)
+    for i in range(int(x/2)):
+        a = temp[i]
+        b = temp[i+1]
+        child = a[0:m] + b[m:n] + a[n:x]
+        temp.append(child)
+    return temp
+
+
+# mutation
+
+def substitution(temp): # need more research
+    print("this is mutation")
+    digits = string.digits # assigning 
+    for i in temp:
+        d = random.choice(digits)
+        d = str(d)
+        length = len(i)
+        l = random.randint(1,length)
+        n = i[l]
+        i.replace(n,d)
+
+    return temp
+            
     
-def graphing(avg_score_parents):
-    global generation
-    plt.plot(avg_score_parents)
-    plt.ylabel("fitness_score")
-    plt.xlabel("generation")
-    plt.xlim(0,100)
-    plt.ylim(0,100)
-    plt.show()
 
-running = True
-generate_parent(x)
-avg_fitness_score(parents,avg_score_parents)
-group_animals(avg_score_parents)
-draw_organism()
-while True:
-    reproduce(parents)
-    graphing(avg_score_parents)
-    drawGrid()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-               
+ 
 
-pygame.display.update()
+def main(generation):
+    global x,parents
+    generate_parent(x)
+    temp = []
+    for i in range(generation):
+        n = random.randint(0,1)
+        temp = [t_selection(parents) for i in range(6)] # evalution and selection
+        if n == 1: # crossover and mutation
+            single_crossover(temp)
+        else:
+            twopoint_crossover(temp)
+
+        #substitution(temp)
+        print("generation",i,temp,"\n")
+    print()
+    evolution.append(temp)
+    parents = temp
+    temp.clear()
+    
+main(generation)
+
