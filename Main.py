@@ -1,6 +1,7 @@
 import random
 from re import M
 import string
+from telnetlib import STATUS
 # parent
 # temp
 # temp with child 
@@ -53,7 +54,8 @@ def evaluation(x):
     return v
                 
 # crossover
-def single_crossover(temp):
+def single_crossover(temp,status):
+    status = random.randint(1,2)
     x = len(temp)
     cp = random.randint(0,x)
     for i in range(int(x/2)):
@@ -61,11 +63,18 @@ def single_crossover(temp):
         b = temp[i+1]
         child = a[0:cp] + b[cp:10]
         temp.append(child)
-    return temp
+    if status == 1:
+        pass
+    else:
+        pass
+        #substitution(temp)
+    return temp,status
         
 
 
-def twopoint_crossover(temp): # have some probelem (produce more children)
+def twopoint_crossover(temp,status):
+    status = random.randint(1,2) # have some probelem (produce more children)
+    x = len(temp)
     one = random.randint(0,x)
     two = random.randint(0,x)
     n = 0
@@ -81,23 +90,32 @@ def twopoint_crossover(temp): # have some probelem (produce more children)
     for i in range(int(x/2)):
         a = temp[i]
         b = temp[i+1]
-        child = a[0:m] + b[m:n] + a[n:x]
+        child = a[0:m] + b[m:n] + a[n:10]
         temp.append(child)
-    return temp
+
+    if status == 1:
+        pass
+    else:
+        pass
+       # substitution(temp)
+
+    return temp,status
 
 
 # mutation
 
-def substitution(temp): # need more research
+def substitution(temp):
+     # need more research
     print("this is mutation")
     digits = string.digits # assigning 
-    for i in temp:
-        d = random.choice(digits)
-        d = str(d)
-        length = len(i)
-        l = random.randint(1,length)
-        n = i[l]
-        i.replace(n,d)
+    i = random.randint(0,len(temp)-1)
+    t = temp[i]
+    d1 = random.randint(0,len(t))
+    d2 = random.choice(digits)
+    d2 = str(d2)
+    t[d1] = d2
+    
+      
 
     return temp
             
@@ -106,6 +124,7 @@ def substitution(temp): # need more research
  
 
 def main(generation):
+    status = ""
     global x,parents
     generate_parent(x)
     temp = []
@@ -113,12 +132,14 @@ def main(generation):
         n = random.randint(0,1)
         temp = [t_selection(parents) for i in range(6)] # evalution and selection
         if n == 1: # crossover and mutation
-            single_crossover(temp)
+            single_crossover(temp,status)
+            print("generation",i,temp,"\n","status = one")
         else:
-            twopoint_crossover(temp)
+            twopoint_crossover(temp,status)
+            print("generation",i,temp,"\n","status = two")
 
         #substitution(temp)
-        print("generation",i,temp,"\n")
+        #print("generation",i,temp,"\n","status = ",status)
     print()
     evolution.append(temp)
     parents = temp
