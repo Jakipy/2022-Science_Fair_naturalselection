@@ -2,16 +2,19 @@ import random
 from re import M
 import string
 from telnetlib import STATUS
+from tkinter import N
+import matplotlib.pyplot as plt
+import numpy as np
 # parent
 # temp
 # temp with child 
 # temp with child -> new parent
 parents = []
 population = 10
-generation = 10 #repeating process 100 times 100 generation
+generation = 100 #repeating process 100 times 100 generation
 evolution = [] # this will be two dimensional list
 
-x = 10 # should be divisible by 5 
+x = 5 # should be divisible by 5 
 def generate_parent(x):
     
     global parents,population
@@ -30,7 +33,7 @@ def t_selection(parents): # this function will select k candiates from the paren
     # in each generation 6 candidates will be choosen. which means t_selection will be excecuted 6 times per generation
     k = int(len(parents)/5) # choose 20% of population
     temp = [] # selected k indiviual genes
-    score = [] # scores for selected k indivual genes
+   
     m = 0
     
     r = random.randint(1,len(parents)-k)
@@ -55,7 +58,7 @@ def evaluation(x):
                 
 # crossover
 def single_crossover(temp,status):
-    status = random.randint(1,2)
+    status = random.randint(1,4)
     x = len(temp)
     cp = random.randint(0,x)
     for i in range(int(x/2)):
@@ -65,15 +68,18 @@ def single_crossover(temp,status):
         temp.append(child)
     if status == 1:
         pass
-    else:
-        pass
-        #substitution(temp)
+    elif status == 2:
+        substitution(temp,random.randint(1,10),random.randint(1,10))
+    elif status == 3:
+        deletion(temp)
+    elif status == 4:
+        insertion(temp)
     return temp,status
         
 
 
 def twopoint_crossover(temp,status):
-    status = random.randint(1,2) # have some probelem (produce more children)
+    status = random.randint(1,4) # have some probelem (produce more children)
     x = len(temp)
     one = random.randint(0,x)
     two = random.randint(0,x)
@@ -95,31 +101,83 @@ def twopoint_crossover(temp,status):
 
     if status == 1:
         pass
-    else:
-        pass
-       # substitution(temp)
+    elif status == 2:
+        substitution(temp,random.randint(1,10),random.randint(1,10))
+    elif status == 3:
+        deletion(temp)
+    elif status == 4:
+        insertion(temp)
 
     return temp,status
 
 
 # mutation
 
-def substitution(temp):
+def substitution(temp,x,y):
      # need more research
     print("this is mutation")
     digits = string.digits # assigning 
     i = random.randint(0,len(temp)-1)
     t = temp[i]
-    d1 = random.randint(0,len(t))
-    d2 = random.choice(digits)
-    d2 = str(d2)
-    t[d1] = d2
     
-      
-
+    t.replace(str(y),str(x))
+    
     return temp
+def deletion(temp):
+    substitution(temp,0,random.randint(1,10))
+
+def insertion(temp):
+    substitution(temp,9,0)
+
+
+def convert(x):
+    s = 0
+    for i in range(len(x)):
+
+        n = int(x[i])
+        s = s+n
+    return s/len(x)
+
+def data(evolution):
+    d = []
+    data = []
+    s = []
+    for i in range(len(evolution)):
+        for j in range(len(evolution[i])):
+            v = convert(evolution[i][j])
+            d.append(v)
+        
+    #return d, len(d)
+    for i in range(len(d)):
+        if i % 10 == 0:
+            if i - 10 == 0:
+                s = d[0:10]
+                data.append(s)
+            else:
+                s = d[i-10:i]
+                data.append(s)
+    
+    return data
+
+
             
     
+def graphing(data):
+    y = []
+    
+    for i in range(len(data)):
+        if len(data[i]) == 0:
+            pass 
+        else:
+            y.append(max(data[i]))
+    x = []
+    x = [i for i in range(len(data)-1)]
+    plt.plot(x,y)
+    #plt.table("generation")
+    #plt.table("fitness score")
+    plt.show()
+    
+
 
  
 
@@ -140,9 +198,19 @@ def main(generation):
 
         #substitution(temp)
         #print("generation",i,temp,"\n","status = ",status)
+        evolution.append(temp)
     print()
-    evolution.append(temp)
+   
     parents = temp
     temp.clear()
+
+    datas = (data(evolution))
+    print("datas,",len(datas))
+    for row in evolution:
+        for elem in row:
+            print(elem, end=' ')
+        print()
+
+    graphing(datas)
     
 main(generation)
