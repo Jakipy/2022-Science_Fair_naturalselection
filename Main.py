@@ -11,7 +11,7 @@ import numpy as np
 # temp with child -> new parent
 parents = []
 population = 10
-generation = 100 #repeating process 100 times 100 generation
+generation = 10 #repeating process 100 times 100 generation
 evolution = [] # this will be two dimensional list
 
 x = 5 # should be divisible by 5 
@@ -69,7 +69,7 @@ def single_crossover(temp,status):
     if status == 1:
         pass
     elif status == 2:
-        substitution(temp,random.randint(1,10),random.randint(1,10))
+        substitution(temp,random.randint(1,10))
     elif status == 3:
         deletion(temp)
     elif status == 4:
@@ -102,7 +102,7 @@ def twopoint_crossover(temp,status):
     if status == 1:
         pass
     elif status == 2:
-        substitution(temp,random.randint(1,10),random.randint(1,10))
+        substitution(temp,random.randint(1,10))
     elif status == 3:
         deletion(temp)
     elif status == 4:
@@ -113,21 +113,20 @@ def twopoint_crossover(temp,status):
 
 # mutation
 
-def substitution(temp,x,y):
-     # need more research
-    print("this is mutation")
-    digits = string.digits # assigning 
+def substitution(temp,x):
+    y = [str(i) for i in range(0,10)]
+    to_be_changed = random.choices(y, weights=(45, 45, 45, 30, 30, 30,20, 20, 4, 1,), k = 1)
     i = random.randint(0,len(temp)-1)
     t = temp[i]
     
-    t.replace(str(y),str(x))
+    t.replace(str(to_be_changed),str(x))
     
     return temp
 def deletion(temp):
-    substitution(temp,0,random.randint(1,10))
+    substitution(temp,0)
 
 def insertion(temp):
-    substitution(temp,9,0)
+    substitution(temp,9)
 
 
 def convert(x):
